@@ -1,0 +1,6 @@
+[package]
+name = "neo4j"
+version = "0.0.1"
+authors = ["Alec Gleason <agleason@buffersandbeer.com>"]
+
+[dependencies]
