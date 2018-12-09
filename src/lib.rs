@@ -1,5 +1,5 @@
 pub mod bolt;
-pub mod util;
+pub mod errors;
 
 #[cfg(test)]
 mod tests {

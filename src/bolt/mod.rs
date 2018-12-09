@@ -1,3 +1,6 @@
+pub mod packer;
+
+/*
 use std::io::prelude::*;
 use std::net::{TcpStream, ToSocketAddrs};
 use super::util::packer::{pack_u32_to_u8};
@@ -7,6 +10,7 @@ const SUPPORTED_VERSIONS: [u32; 1] = [0x1];
 
 pub struct BoltConnection {
 }
+
 
 impl BoltConnection {
     pub fn connect<Addr: ToSocketAddrs>(server_address: Addr) -> Result<BoltConnection, String> {
@@ -35,4 +39,4 @@ impl BoltConnection {
 
         Ok(BoltConnection {})
     }
-}
+}*/
