@@ -1,6 +1,9 @@
 pub mod bolt;
 pub mod errors;
 
+#[macro_use] 
+extern crate log;
+
 #[cfg(test)]
 mod tests {
     #[test]

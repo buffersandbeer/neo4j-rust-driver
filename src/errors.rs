@@ -24,6 +24,31 @@ impl Error for PackingError {
     }
 }
 
+
+#[derive(Debug)]
+pub struct ConnectionError {
+    pub details: String
+}
+
+impl ConnectionError {
+    pub fn new(msg: &str) -> ConnectionError {
+        ConnectionError { details: msg.to_string() }
+    }
+}
+
+impl fmt::Display for ConnectionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.details)
+    }
+}
+
+impl Error for ConnectionError {
+    fn description(&self) -> &str {
+        &self.details
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::{PackingError};
