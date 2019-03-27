@@ -62,16 +62,20 @@ impl BoltConnection {
             return Err(ConnectionError::new("Incorrect sent handshake bytes"));
         }
 
-        let mut server_agreed_version: [u8; 4] = [0; 4];
-        match stream.read_exact(&mut server_agreed_version) {
+        let mut server_agreed_version_packed: [u8; 4] = [0; 4];
+        match stream.read_exact(&mut server_agreed_version_packed) {
             Ok(_) => (),
             Err(err) => return Err(ConnectionError::new(&err.to_string())),
         };
-
+        
         debug!("Recieved response from server");
-
+        let server_agreed_version: u32 = packer::u8_to_u32_be(server_agreed_version_packed);
+        if server_agreed_version < 1 {
+            return Err(ConnectionError::new("Server does not support requested protocol version(s)"));
+        }
         Ok(BoltConnection{ stream: stream })
     }
+
 }
 
 #[cfg(test)]
