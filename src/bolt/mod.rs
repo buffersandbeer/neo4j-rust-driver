@@ -80,10 +80,86 @@ impl BoltConnection {
 
 #[cfg(test)]
 mod tests {
-    
+    use std::{thread, time};
+    use std::net::{TcpListener};
+    use std::io::{Write, Read};
+    use super::{BoltConnection};
+    use super::packer::{u8_to_u32_be};
+
     #[test]
     fn test_connect() {
+
+        let test_server = thread::spawn(move || {
+            let listener = TcpListener::bind("127.0.0.1:17687").unwrap();
+            for stream in listener.incoming() {
+                match stream {
+                    Ok(mut stream) => {
+
+                        let mut request_buffer: [u8; 20] = [0; 20];
+                        stream.read(&mut request_buffer).unwrap();
+                        let mut unpacked_request: [u32; 5] = [0; 5];
+                        for iter in 0..5 {
+                            unpacked_request[iter] = u8_to_u32_be([request_buffer[iter + 0], 
+                                                                  request_buffer[iter + 1], 
+                                                                  request_buffer[iter + 2], 
+                                                                  request_buffer[iter + 3]]);
+                        }
+                        if unpacked_request[0] != 0x6060B017 {
+                            stream.write(&[0u8; 4]).unwrap(); 
+                        }
+                        if unpacked_request[1] != 1 && 
+                           unpacked_request[2] != 1 &&
+                           unpacked_request[3] != 1 &&
+                           unpacked_request[4] != 1 {
+                            stream.write(&[0u8; 4]).unwrap(); 
+                        }
+
+
+                        let version: [u8; 4]  = [0,0,0,1];
+                        stream.write(&version).unwrap();
+                        break;
+                    }
+                    Err(e) => {
+                        panic!("Error: {}", e);
+                    }
+                }
+            }
+        });
         
+        let ten_mil = time::Duration::from_millis(10);
+        thread::sleep(ten_mil);
+        let _connection = match BoltConnection::connect("127.0.0.1:17687") {
+            Ok(con) => con,
+            Err(err) => panic!("Error: {}", err),
+        };
+
+        test_server.join().unwrap();
+    }
+
+    #[test]
+    fn test_connect_unsupported_ver_response() {
+        let test_server = thread::spawn(move || {
+            let listener = TcpListener::bind("127.0.0.1:17688").unwrap();
+            for stream in listener.incoming() {
+                match stream {
+                    Ok(mut stream) => {
+                        stream.write(&[0u8; 4]).unwrap(); 
+                        break;
+                    }
+                    Err(e) => {
+                        panic!("Error: {}", e);
+                    }
+                }
+            }
+        });
+        
+        let ten_mil = time::Duration::from_millis(10);
+        thread::sleep(ten_mil);
+        let _connection = match BoltConnection::connect("127.0.0.1:17688") {
+            Ok(_con) => assert!(false),
+            Err(_err) => (),
+        };
+        test_server.join().unwrap();
     }
 
 }
